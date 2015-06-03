@@ -51,7 +51,10 @@ public class Game implements ApplicationListener{
 		res.loadTexture("resources/purple.png", "purpleSquare");
 		res.loadTexture("resources/green.png", "greenSquare");
 		res.loadTexture("resources/purplePlayer.png", "purplePlayer");
+		res.loadTexture("resources/greenPlayer.png", "greenPlayer");
+		res.loadTexture("resources/purplePlayerBall.png", "purplePlayerBall");		
 		res.loadTexture("resources/ball.png", "ball");		
+		
 	}
 
 	@Override

@@ -6,12 +6,21 @@ public class B2DVars {
 	public static final float PPM = 100; 
 		
 	//category bits - potencias de 2
-	
 	public static final short BIT_WALL = 2;
 	public static final short BIT_PLAYER = 4;
 	public static final short BIT_BALL = 8;
 	public static final short BIT_CORNER = 12;
 	
+	//Color codes
 	public static final int PURPLE = 1000;
 	public static final int GREEN = 2000;
+	
+	//Collision side codes
+	public static final int DOWN = 2;
+	public static final int UP = 8;
+	public static final int LEFT = 4;
+	public static final int RIGHT = 6;
+
+
+
 }

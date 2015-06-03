@@ -17,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.lpoo.hokra.entities.Ball;
 import com.lpoo.hokra.entities.Player;
 import com.lpoo.hokra.entities.Square;
@@ -35,9 +36,12 @@ public class Play extends GameState {
 	//private Body playerBody;
 	private MyContactListener cl;
 	
-	private Player player;
+	private Player player1;
+	private Player player2;
 	private Square squareP1, squareP2, squareG1, squareG2;
 	private Ball ball;
+	
+	private boolean debug = true;
 	
 	public Play(GameStateManager gsm){
 		super(gsm);
@@ -45,40 +49,26 @@ public class Play extends GameState {
 		cl = new MyContactListener();
 		world.setContactListener(cl);
 		b2dr = new Box2DDebugRenderer();
-		
-		
 
 		//static body - dont move, unaffected by forces (WALL)
 		//dynamic body - always get affected by forces (PLAYER)
 		//kinematic body - dont get affected by forces 
 		
-		
-		
-	
 		//create player
-		createPlayer();
-		
-
-		//create foot sensor
-		/*
-		shape.setAsBox(2 / PPM,2 / PPM, new Vector2(0,-5/PPM),0);
-		fdef.shape = shape;
-		fdef.restitution = 0f;
-		fdef.filter.categoryBits = B2DVars.BIT_PLAYER;
-		fdef.filter.maskBits = B2DVars.BIT_GROUND;
-		fdef.isSensor = true;
-		
-		playerBdy.createFixture(fdef).setUserData("foot");
-	*/
+		player1 = createPlayer(100,100,B2DVars.PURPLE,"purplePlayer");
+		player2 = createPlayer(150, 150, B2DVars.GREEN, "greenPlayer");
 		
 		//create ball
-		createBall();
+		ball = createBall(200, 200);
 		
 		//create walls
 		createWalls();
 		
-		//create squares
-		createCorners();
+		//create corners
+		squareP1 = createCorner(0,0,B2DVars.PURPLE, "purpleCorner");
+		squareP2 = createCorner(V_WIDTH/PPM, V_HEIGHT/PPM, B2DVars.PURPLE, "purpleCorner");
+		squareG1 = createCorner(0, V_HEIGHT/PPM, B2DVars.GREEN, "greenCorner");
+		squareG2 = createCorner(V_WIDTH/PPM, 0, B2DVars.GREEN, "greenCorner");
 		
 		
 		//set up b2dCam
@@ -88,31 +78,162 @@ public class Play extends GameState {
 	
 	@Override
 	public void handleInput() {
-		if(MyInput.isDown(MyInput.BUTTON1)){
-			System.out.println("pressed w");
-			player.getBody().applyForceToCenter(0, 2.5f);	
+		if(MyInput.isDown(MyInput.W_KEY)){
+			player1.getBody().applyForceToCenter(0, 2.1f);
+			player1.setDirection(B2DVars.UP);
 		}
-		else if(MyInput.isDown(MyInput.BUTTON2)){
-			System.out.println("pressed s");
-			player.getBody().applyForceToCenter(0, -2.5f);
+		if(MyInput.isDown(MyInput.S_KEY)){
+			player1.getBody().applyForceToCenter(0, -2.1f);
+			player1.setDirection(B2DVars.DOWN);
 		}
-		else if(MyInput.isDown(MyInput.BUTTON3)){
-			System.out.println("pressed a");
-			player.getBody().applyForceToCenter(-2.5f, 0);
+		if(MyInput.isDown(MyInput.A_KEY)){
+			player1.getBody().applyForceToCenter(-2.1f, 0);
+			player1.setDirection(B2DVars.LEFT);
 		}
-		else if(MyInput.isDown(MyInput.BUTTON4)){
-			System.out.println("pressed d");
-			player.getBody().applyForceToCenter(2.5f, 0);
+		if(MyInput.isDown(MyInput.D_KEY)){
+			player1.getBody().applyForceToCenter(2.1f, 0);
+			player1.setDirection(B2DVars.RIGHT);
 		}
-	
+
+		if(MyInput.isPressed(MyInput.SPACE_KEY)){
+			if(cl.isHoldingBall()){
+				float x = player1.getBody().getPosition().x*PPM;
+				float y = player1.getBody().getPosition().y*PPM;
+
+				cl.setHoldingBall(false);
+				int direction = player1.getDirection();
+				
+				/*float angle = player.getBody().getAngle();
+				
+				if(angle<Math.PI/2 && angle>=0)
+					player.setDirection(B2DVars.RIGHT);
+				else if(angle<Math.PI && angle>=Math.PI/2)
+					player.setDirection(B2DVars.UP);
+				else if(angle<3*Math.PI/2 && angle>=Math.PI)
+					player.setDirection(B2DVars.LEFT);
+				else if(angle>3*Math.PI/2)
+					player.setDirection(B2DVars.DOWN);
+
+			*/
+				switch(direction){
+				case B2DVars.DOWN:
+					y-=10;
+					ball = createBall(x,y);
+					ball.getBody().applyForceToCenter(0, -150f);
+					break;
+				case B2DVars.UP:
+					y+=10;
+					ball = createBall(x,y);
+					ball.getBody().applyForceToCenter(0, 150f);
+					break;
+				case B2DVars.LEFT:
+					x-=10;
+					ball = createBall(x,y);
+					ball.getBody().applyForceToCenter(-150f, 0);
+					break;
+				case B2DVars.RIGHT:
+					x+=10;
+					ball = createBall(x,y);
+					ball.getBody().applyForceToCenter(150f,0);
+					break;
+				default:
+					break;
+				}
+
+			}
+		}
 		
+		if(MyInput.isDown(MyInput.UP_KEY)){
+			player2.getBody().applyForceToCenter(0, 2.1f);
+			player2.setDirection(B2DVars.UP);
+		}
+		if(MyInput.isDown(MyInput.DOWN_KEY)){
+			player2.getBody().applyForceToCenter(0, -2.1f);
+			player2.setDirection(B2DVars.DOWN);
+		}
+		if(MyInput.isDown(MyInput.LEFT_KEY)){
+			player2.getBody().applyForceToCenter(-2.1f, 0);
+			player2.setDirection(B2DVars.LEFT);
+		}
+		if(MyInput.isDown(MyInput.RIGHT_KEY)){
+			player2.getBody().applyForceToCenter(2.1f, 0);
+			player2.setDirection(B2DVars.RIGHT);
+		}
+
+		if(MyInput.isPressed(MyInput.PLUS_KEY)){
+			if(cl.isHoldingBall()){
+				float x = player2.getBody().getPosition().x*PPM;
+				float y = player2.getBody().getPosition().y*PPM;
+
+				cl.setHoldingBall(false);
+				int direction = player2.getDirection();
+				
+				/*float angle = player.getBody().getAngle();
+				
+				if(angle<Math.PI/2 && angle>=0)
+					player.setDirection(B2DVars.RIGHT);
+				else if(angle<Math.PI && angle>=Math.PI/2)
+					player.setDirection(B2DVars.UP);
+				else if(angle<3*Math.PI/2 && angle>=Math.PI)
+					player.setDirection(B2DVars.LEFT);
+				else if(angle>3*Math.PI/2)
+					player.setDirection(B2DVars.DOWN);
+
+			*/
+				switch(direction){
+				case B2DVars.DOWN:
+					y-=10;
+					ball = createBall(x,y);
+					ball.getBody().applyForceToCenter(0, -150f);
+					break;
+				case B2DVars.UP:
+					y+=10;
+					ball = createBall(x,y);
+					ball.getBody().applyForceToCenter(0, 150f);
+					break;
+				case B2DVars.LEFT:
+					x-=10;
+					ball = createBall(x,y);
+					ball.getBody().applyForceToCenter(-150f, 0);
+					break;
+				case B2DVars.RIGHT:
+					x+=10;
+					ball = createBall(x,y);
+					ball.getBody().applyForceToCenter(150f,0);
+					break;
+				default:
+					break;
+				}
+
+			}
+		}
+		
+		
+
+
 	}
 
 	@Override
 	public void update(float dt) {
 		handleInput();
 		world.step(dt, 6, 2);
-		player.update(dt);
+		updateBall();
+		
+		ball.update(dt);
+		player1.update(dt);
+	}
+
+	private void updateBall() {
+		if(ball.getBody().isActive()) {
+			if(cl.isHoldingBall()){
+				ball.getBody().setUserData(null);
+				for(int i =0; i<ball.getSprites().length; i++){
+					ball.getSprites()[i].getTexture().dispose();
+				}
+				ball.getTex().dispose();
+				world.destroyBody(ball.getBody());
+			}
+		}
 	}
 
 	@Override
@@ -131,12 +252,15 @@ public class Play extends GameState {
 		squareP2.render(sb);
 		squareG1.render(sb);
 		squareG2.render(sb);
-		player.render(sb);
+		player1.render(sb);
+		player2.render(sb);
+		//ball.render(sb);
 
 
 		
 		//draw screen
-		b2dr.render(world, b2dCam.combined);
+		if(debug)
+			b2dr.render(world, b2dCam.combined);
 		
 	}
 
@@ -146,79 +270,55 @@ public class Play extends GameState {
 
 	}
 	
-	public void createPlayer(){
+	public Player createPlayer(float x, float y, int color, String userData){
 		
 		BodyDef bDef = new BodyDef();
 		FixtureDef fDef = new FixtureDef();
 		PolygonShape shape = new PolygonShape();
 		Body body = world.createBody(bDef);
-		
-		
-			bDef.position.set(160 / PPM,200 / PPM);
-			bDef.type = BodyType.DynamicBody;
-			body = world.createBody(bDef);
-			body.setLinearDamping(1f);
-			shape.setAsBox(5 / PPM,5 / PPM);
 
-			fDef.shape = shape;
-			fDef.restitution = 0f;
 
-			fDef.filter.categoryBits = B2DVars.BIT_PLAYER;
-			fDef.filter.maskBits = B2DVars.BIT_WALL | B2DVars.BIT_BALL;
-			body.createFixture(fDef).setUserData("player");
-		
-		
-		player = new Player(body);
-		
-		body.setUserData("player");
-	}
+		bDef.position.set(x / PPM,y / PPM);
+		bDef.type = BodyType.DynamicBody;
+		body = world.createBody(bDef);
+		body.setLinearDamping(1f);
+		shape.setAsBox(5 / PPM,5 / PPM);
+
+		fDef.shape = shape;
+		fDef.restitution = 0f;
+
+		fDef.filter.categoryBits = B2DVars.BIT_PLAYER;
+		fDef.filter.maskBits = B2DVars.BIT_WALL | B2DVars.BIT_BALL; 
+		body.createFixture(fDef).setUserData(userData);
+
 	
-	public void createCorners(){
-		BodyDef corner1 = new BodyDef();
-		BodyDef corner2 = new BodyDef();
-		BodyDef corner3 = new BodyDef();
-		BodyDef corner4 = new BodyDef();
+		 Player player = new Player(body, color);
+		 return player;
+	}
 
-		corner1.position.set(0,0);
-		corner2.position.set(0,V_HEIGHT/PPM);
-		corner3.position.set(V_WIDTH/PPM, V_HEIGHT/PPM);
-		corner4.position.set(V_WIDTH/PPM,0);
+	public Square createCorner(float x, float y, int color, String userData){
 
-		corner1.type = BodyType.KinematicBody; 
-		corner2.type = BodyType.KinematicBody; 
-		corner3.type = BodyType.KinematicBody; 
-		corner4.type = BodyType.KinematicBody; 
+		BodyDef corner = new BodyDef();
+		corner.position.set(x,y);
+		corner.type = BodyType.KinematicBody;
+		Body cornerB = world.createBody(corner);
 
-		Body cornerP1 = world.createBody(corner1);
-		Body cornerG1 = world.createBody(corner2);
-		Body cornerP2 = world.createBody(corner3);
-		Body cornerG2= world.createBody(corner4);
 
-		
-		
 		PolygonShape cShape = new PolygonShape();
 		FixtureDef cornerDef = new FixtureDef();
 		cShape.setAsBox(50/PPM, 50/PPM);
 
 		cornerDef.shape = cShape;
-		
-		cornerP1.createFixture(cornerDef).setUserData("cornerP1");
-		cornerP2.createFixture(cornerDef).setUserData("cornerP2");
-		cornerG1.createFixture(cornerDef).setUserData("cornerG1");
-		cornerG2.createFixture(cornerDef).setUserData("cornerG2");
-		
-		squareP1 = new Square(cornerP1, B2DVars.PURPLE);
-		squareP2 = new Square(cornerP2,B2DVars.PURPLE);
-		cornerP1.setUserData("square");
-		cornerP2.setUserData("square");
-		
-		squareG1 = new Square(cornerG1, B2DVars.GREEN);
-		squareG2 = new Square(cornerG2,B2DVars.GREEN);
-		cornerG1.setUserData("square");
-		cornerG2.setUserData("square");
 
+	//	cornerDef.filter.categoryBits = B2DVars.BIT_CORNER;
+	//	cornerDef.filter.maskBits = B2DVars.BIT_PLAYER;
+		cornerB.createFixture(cornerDef).setUserData(userData);
+
+		Square sq = new Square(cornerB, color);
+
+		return sq;
 	}
-	
+
 	public void createWalls(){
 
 		BodyDef wall = new BodyDef();
@@ -245,27 +345,29 @@ public class Play extends GameState {
 		wallB.createFixture(wallDef).setUserData("wall");
 	}
 	
-	public void createBall(){
+	public Ball createBall(float x, float y){
 		BodyDef bdef = new BodyDef();
 		Body body = world.createBody(bdef);
 		FixtureDef fdef = new FixtureDef();
 		
-		bdef.position.set(160 / PPM,200 / PPM);
+		bdef.position.set(x / PPM,y / PPM);
 		bdef.type = BodyType.DynamicBody;
 		body = world.createBody(bdef);
 		
-		bdef.position.set(153 /PPM, 220 / PPM);
 		body.setLinearDamping(0.1f);
 		CircleShape cshape = new CircleShape();
 		cshape.setRadius(2 / PPM);
 		fdef.shape = cshape;
 		fdef.restitution = 0f;
 		fdef.filter.categoryBits = B2DVars.BIT_BALL;
-		fdef.filter.maskBits = B2DVars.BIT_PLAYER | B2DVars.BIT_WALL;
+		fdef.filter.maskBits = B2DVars.BIT_WALL | B2DVars.BIT_PLAYER; 
 
 		body.createFixture(fdef).setUserData("ball");
 		
-		ball = new Ball(body);
+		Ball ball = new Ball(body);
+		System.out.println("CRIA BOLA");
+		
+		return ball;
 	}
 
 }

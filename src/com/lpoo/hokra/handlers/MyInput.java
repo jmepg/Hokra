@@ -5,12 +5,19 @@ public class MyInput {
 		public static boolean[] keys;
 		public static boolean[] pkeys;
 		
-		public static final int NUM_KEYS = 4;
-		public static final int BUTTON1 = 0;
-		public static final int BUTTON2 = 1;
-		public static final int BUTTON3 = 2;
-		public static final int BUTTON4 = 3;
-	
+		public static final int NUM_KEYS = 10;
+		public static final int W_KEY = 0;
+		public static final int S_KEY = 1;
+		public static final int A_KEY = 2;
+		public static final int D_KEY = 3;
+		public static final int SPACE_KEY = 4;
+		
+		public static final int UP_KEY = 5;
+		public static final int DOWN_KEY = 6;
+		public static final int LEFT_KEY = 7;
+		public static final int RIGHT_KEY = 8;
+		public static final int PLUS_KEY = 9;
+
 		
 		static{
 			keys = new boolean[NUM_KEYS] ;
