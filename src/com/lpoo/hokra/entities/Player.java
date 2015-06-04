@@ -10,7 +10,8 @@ public class Player extends B2DSprite{
 
 	private boolean holdingBall;
 	Texture tex;
-	int direction;
+	private int direction = B2DVars.RIGHT;
+	private int score = 0;
 	
 	public int getDirection() {
 		return direction;
@@ -35,6 +36,15 @@ public class Player extends B2DSprite{
 	}
 	public void setHoldingBall(boolean holdingBall) {
 		this.holdingBall = holdingBall;
+	}
+	public int getScore() {
+		return score;
+	}
+	public void setScore(int score) {
+		this.score = score;
+	}
+	public void incScore(){
+		score++;
 	}
 	
 }

@@ -78,138 +78,59 @@ public class Play extends GameState {
 	
 	@Override
 	public void handleInput() {
+		float p1Ball, p2Ball;
+		
+		if(player1.isHoldingBall())
+			p1Ball = 1.9f;
+		else
+			p1Ball = 2.1f;
+		
+		if(player2.isHoldingBall())
+			p2Ball = 1.9f;
+		else
+			p2Ball = 2.1f;
+			
 		if(MyInput.isDown(MyInput.W_KEY)){
-			player1.getBody().applyForceToCenter(0, 2.1f);
+			player1.getBody().applyForceToCenter(0, p1Ball);
 			player1.setDirection(B2DVars.UP);
 		}
 		if(MyInput.isDown(MyInput.S_KEY)){
-			player1.getBody().applyForceToCenter(0, -2.1f);
+			player1.getBody().applyForceToCenter(0, -p1Ball);
 			player1.setDirection(B2DVars.DOWN);
 		}
 		if(MyInput.isDown(MyInput.A_KEY)){
-			player1.getBody().applyForceToCenter(-2.1f, 0);
+			player1.getBody().applyForceToCenter(-p1Ball, 0);
 			player1.setDirection(B2DVars.LEFT);
 		}
 		if(MyInput.isDown(MyInput.D_KEY)){
-			player1.getBody().applyForceToCenter(2.1f, 0);
+			player1.getBody().applyForceToCenter(p1Ball, 0);
 			player1.setDirection(B2DVars.RIGHT);
 		}
 
 		if(MyInput.isPressed(MyInput.SPACE_KEY)){
-			if(cl.isHoldingBall()){
-				float x = player1.getBody().getPosition().x*PPM;
-				float y = player1.getBody().getPosition().y*PPM;
-
-				cl.setHoldingBall(false);
-				int direction = player1.getDirection();
-				
-				/*float angle = player.getBody().getAngle();
-				
-				if(angle<Math.PI/2 && angle>=0)
-					player.setDirection(B2DVars.RIGHT);
-				else if(angle<Math.PI && angle>=Math.PI/2)
-					player.setDirection(B2DVars.UP);
-				else if(angle<3*Math.PI/2 && angle>=Math.PI)
-					player.setDirection(B2DVars.LEFT);
-				else if(angle>3*Math.PI/2)
-					player.setDirection(B2DVars.DOWN);
-
-			*/
-				switch(direction){
-				case B2DVars.DOWN:
-					y-=10;
-					ball = createBall(x,y);
-					ball.getBody().applyForceToCenter(0, -150f);
-					break;
-				case B2DVars.UP:
-					y+=10;
-					ball = createBall(x,y);
-					ball.getBody().applyForceToCenter(0, 150f);
-					break;
-				case B2DVars.LEFT:
-					x-=10;
-					ball = createBall(x,y);
-					ball.getBody().applyForceToCenter(-150f, 0);
-					break;
-				case B2DVars.RIGHT:
-					x+=10;
-					ball = createBall(x,y);
-					ball.getBody().applyForceToCenter(150f,0);
-					break;
-				default:
-					break;
-				}
-
-			}
+			shootBall(player1);
 		}
 		
 		if(MyInput.isDown(MyInput.UP_KEY)){
-			player2.getBody().applyForceToCenter(0, 2.1f);
+			player2.getBody().applyForceToCenter(0, p2Ball);
 			player2.setDirection(B2DVars.UP);
 		}
 		if(MyInput.isDown(MyInput.DOWN_KEY)){
-			player2.getBody().applyForceToCenter(0, -2.1f);
+			player2.getBody().applyForceToCenter(0, -p2Ball);
 			player2.setDirection(B2DVars.DOWN);
 		}
 		if(MyInput.isDown(MyInput.LEFT_KEY)){
-			player2.getBody().applyForceToCenter(-2.1f, 0);
+			player2.getBody().applyForceToCenter(-p2Ball, 0);
 			player2.setDirection(B2DVars.LEFT);
 		}
 		if(MyInput.isDown(MyInput.RIGHT_KEY)){
-			player2.getBody().applyForceToCenter(2.1f, 0);
+			player2.getBody().applyForceToCenter(p2Ball, 0);
 			player2.setDirection(B2DVars.RIGHT);
 		}
 
 		if(MyInput.isPressed(MyInput.PLUS_KEY)){
-			if(cl.isHoldingBall()){
-				float x = player2.getBody().getPosition().x*PPM;
-				float y = player2.getBody().getPosition().y*PPM;
-
-				cl.setHoldingBall(false);
-				int direction = player2.getDirection();
-				
-				/*float angle = player.getBody().getAngle();
-				
-				if(angle<Math.PI/2 && angle>=0)
-					player.setDirection(B2DVars.RIGHT);
-				else if(angle<Math.PI && angle>=Math.PI/2)
-					player.setDirection(B2DVars.UP);
-				else if(angle<3*Math.PI/2 && angle>=Math.PI)
-					player.setDirection(B2DVars.LEFT);
-				else if(angle>3*Math.PI/2)
-					player.setDirection(B2DVars.DOWN);
-
-			*/
-				switch(direction){
-				case B2DVars.DOWN:
-					y-=10;
-					ball = createBall(x,y);
-					ball.getBody().applyForceToCenter(0, -150f);
-					break;
-				case B2DVars.UP:
-					y+=10;
-					ball = createBall(x,y);
-					ball.getBody().applyForceToCenter(0, 150f);
-					break;
-				case B2DVars.LEFT:
-					x-=10;
-					ball = createBall(x,y);
-					ball.getBody().applyForceToCenter(-150f, 0);
-					break;
-				case B2DVars.RIGHT:
-					x+=10;
-					ball = createBall(x,y);
-					ball.getBody().applyForceToCenter(150f,0);
-					break;
-				default:
-					break;
-				}
-
-			}
-		}
-		
-		
-
+			shootBall(player2);
+		}	
 
 	}
 
@@ -218,23 +139,13 @@ public class Play extends GameState {
 		handleInput();
 		world.step(dt, 6, 2);
 		updateBall();
-		
+		updateballHolder();
+		updatePlayerScore();
 		ball.update(dt);
 		player1.update(dt);
+		player2.update(dt);
 	}
 
-	private void updateBall() {
-		if(ball.getBody().isActive()) {
-			if(cl.isHoldingBall()){
-				ball.getBody().setUserData(null);
-				for(int i =0; i<ball.getSprites().length; i++){
-					ball.getSprites()[i].getTexture().dispose();
-				}
-				ball.getTex().dispose();
-				world.destroyBody(ball.getBody());
-			}
-		}
-	}
 
 	@Override
 	public void render() {	
@@ -270,6 +181,54 @@ public class Play extends GameState {
 
 	}
 	
+	
+	
+	private void updateballHolder() {
+
+		if(!ball.getBody().isActive()){
+			if(cl.isP1HoldingBall())
+				player1.setHoldingBall(true);
+			if(cl.isP2HoldingBall())
+				player2.setHoldingBall(true);
+		}
+		else{
+			cl.setP1HoldingBall(false);
+			cl.setP2HoldingBall(false);
+		}
+		
+		
+		if(cl.isPlayerColliding()){
+			System.out.println("POSICOES IGUAIS");
+			if(player1.isHoldingBall()){
+				player1.setHoldingBall(false);
+				cl.setP1HoldingBall(false);
+				player2.setHoldingBall(true);
+				cl.setP2HoldingBall(true);
+
+			}
+			else if(player2.isHoldingBall()){
+				player2.setHoldingBall(false);
+				cl.setP2HoldingBall(false);
+				player1.setHoldingBall(true);
+				cl.setP2HoldingBall(true);
+			}
+		}
+	}
+
+	private void updateBall() {
+		if(ball.getBody().isActive()) {
+			if(cl.isP1HoldingBall() || cl.isP2HoldingBall()){
+				ball.getBody().setUserData(null);
+				for(int i =0; i<ball.getSprites().length; i++){
+					ball.getSprites()[i].getTexture().dispose();
+				}
+				ball.getTex().dispose();
+				world.destroyBody(ball.getBody());
+			}
+		}
+	}
+
+	
 	public Player createPlayer(float x, float y, int color, String userData){
 		
 		BodyDef bDef = new BodyDef();
@@ -290,10 +249,18 @@ public class Play extends GameState {
 		fDef.filter.categoryBits = B2DVars.BIT_PLAYER;
 		fDef.filter.maskBits = B2DVars.BIT_WALL | B2DVars.BIT_BALL; 
 		body.createFixture(fDef).setUserData(userData);
+		
+		//create sensor
+		shape.setAsBox(2/PPM, 2/PPM);
+		fDef.shape = shape;
+		fDef.filter.categoryBits = B2DVars.BIT_PLAYER_SENSOR;
+		fDef.filter.maskBits = B2DVars.BIT_PLAYER_SENSOR | B2DVars.BIT_CORNER_PURPLE | B2DVars.BIT_CORNER_GREEN;
+		fDef.isSensor = true;
+		body.createFixture(fDef).setUserData("playerSensor");
 
-	
-		 Player player = new Player(body, color);
-		 return player;
+		Player player = new Player(body, color);
+		shape.dispose();
+		return player;
 	}
 
 	public Square createCorner(float x, float y, int color, String userData){
@@ -310,12 +277,22 @@ public class Play extends GameState {
 
 		cornerDef.shape = cShape;
 
-	//	cornerDef.filter.categoryBits = B2DVars.BIT_CORNER;
-	//	cornerDef.filter.maskBits = B2DVars.BIT_PLAYER;
+		//	cornerDef.filter.categoryBits = B2DVars.BIT_CORNER;
+		//	cornerDef.filter.maskBits = B2DVars.BIT_PLAYER;
+		cornerB.createFixture(cornerDef).setUserData("corner");
+		
+		//create sensor
+		cShape.setAsBox(47/PPM, 47/PPM);
+		cornerDef.shape = cShape;
+		if(color == B2DVars.PURPLE)
+			cornerDef.filter.categoryBits = B2DVars.BIT_CORNER_PURPLE;
+		if(color == B2DVars.GREEN)
+			cornerDef.filter.categoryBits = B2DVars.BIT_CORNER_GREEN;
+		cornerDef.filter.maskBits = B2DVars.BIT_PLAYER_SENSOR;
+		cornerDef.isSensor = true;
 		cornerB.createFixture(cornerDef).setUserData(userData);
-
 		Square sq = new Square(cornerB, color);
-
+		cShape.dispose();
 		return sq;
 	}
 
@@ -343,6 +320,7 @@ public class Play extends GameState {
 
 		wShape.set(V_WIDTH/PPM, V_HEIGHT/PPM, V_WIDTH/PPM, 0); //right wall
 		wallB.createFixture(wallDef).setUserData("wall");
+		wShape.dispose();
 	}
 	
 	public Ball createBall(float x, float y){
@@ -365,9 +343,76 @@ public class Play extends GameState {
 		body.createFixture(fdef).setUserData("ball");
 		
 		Ball ball = new Ball(body);
-		System.out.println("CRIA BOLA");
-		
+		cshape.dispose();
 		return ball;
+	}
+	
+	public void shootBall(Player pl){
+
+		if(pl.isHoldingBall()){
+			float x = pl.getBody().getPosition().x*PPM;
+			float y = pl.getBody().getPosition().y*PPM;
+			
+			pl.setHoldingBall(false);
+			cl.setP1HoldingBall(false);
+			cl.setP2HoldingBall(false);
+			
+			int direction = pl.getDirection();
+			
+			/*float angle = player.getBody().getAngle();
+			
+			if(angle<Math.PI/2 && angle>=0)
+				player.setDirection(B2DVars.RIGHT);
+			else if(angle<Math.PI && angle>=Math.PI/2)
+				player.setDirection(B2DVars.UP);
+			else if(angle<3*Math.PI/2 && angle>=Math.PI)
+				player.setDirection(B2DVars.LEFT);
+			else if(angle>3*Math.PI/2)
+				player.setDirection(B2DVars.DOWN);
+
+		*/
+			switch(direction){
+			case B2DVars.DOWN:
+				y-=10;
+				ball = createBall(x,y);
+				ball.getBody().applyForceToCenter(0, -150f);
+				break;
+			case B2DVars.UP:
+				y+=10;
+				ball = createBall(x,y);
+				ball.getBody().applyForceToCenter(0, 150f);
+				break;
+			case B2DVars.LEFT:
+				x-=10;
+				ball = createBall(x,y);
+				ball.getBody().applyForceToCenter(-150f, 0);
+				break;
+			case B2DVars.RIGHT:
+				x+=10;
+				ball = createBall(x,y);
+				ball.getBody().applyForceToCenter(150f,0);
+				break;
+			default:
+				break;
+			}
+
+		}
+	}
+	
+	public void updatePlayerScore(){
+		if(cl.isPlayerInPurple()){
+			if(player1.isHoldingBall()){
+				player1.incScore();
+				System.out.println(player1.getScore());
+			}
+		}
+		if(cl.isPlayerInGreen()){
+			if(player2.isHoldingBall()){
+				player2.incScore();
+				System.out.println(player1.getScore());
+			}
+		}
+		
 	}
 
 }

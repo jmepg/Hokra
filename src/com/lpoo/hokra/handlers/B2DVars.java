@@ -9,7 +9,9 @@ public class B2DVars {
 	public static final short BIT_WALL = 2;
 	public static final short BIT_PLAYER = 4;
 	public static final short BIT_BALL = 8;
-	public static final short BIT_CORNER = 12;
+	public static final short BIT_CORNER_PURPLE = 16;
+	public static final short BIT_CORNER_GREEN = 32;
+	public static final short BIT_PLAYER_SENSOR = 64;
 	
 	//Color codes
 	public static final int PURPLE = 1000;
