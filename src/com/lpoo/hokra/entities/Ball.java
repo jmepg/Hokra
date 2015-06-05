@@ -31,5 +31,6 @@ public class Ball extends B2DSprite{
 	public void setTex(Texture tex) {
 		this.tex = tex;
 	}
+	
 
 }

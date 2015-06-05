@@ -47,14 +47,22 @@ public class Game implements ApplicationListener{
 		gsm = new GameStateManager(this);
 	}
 
-	public void loadTextures(Content res2) {
+	public void loadTextures(Content res) {
 		res.loadTexture("resources/purple.png", "purpleSquare");
 		res.loadTexture("resources/green.png", "greenSquare");
 		res.loadTexture("resources/purplePlayer.png", "purplePlayer");
 		res.loadTexture("resources/greenPlayer.png", "greenPlayer");
 		res.loadTexture("resources/purplePlayerBall.png", "purplePlayerBall");		
 		res.loadTexture("resources/ball.png", "ball");		
-		
+		res.loadTexture("resources/playButton.png", "playButton");		
+		res.loadTexture("resources/backBar.png", "backBar");		
+		res.loadTexture("resources/backBar1.png", "backBar1");	
+		res.loadTexture("resources/backBar2.png", "backBar2");	
+		res.loadTexture("resources/backBar3.png", "backBar3");		
+		res.loadTexture("resources/background.png", "background");		
+
+
+
 	}
 
 	@Override

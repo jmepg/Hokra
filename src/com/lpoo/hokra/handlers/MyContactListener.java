@@ -12,25 +12,13 @@ public class MyContactListener implements ContactListener{
 
 	private boolean p1HoldingBall;
 	private boolean p2HoldingBall;
-	private boolean playerInPurple;
-	private boolean playerInGreen;
+
 	private boolean playerColliding;
-	 
-	public boolean isPlayerInPurple() {
-		return playerInPurple;
-	}
-
-	public void setPlayerInPurple(boolean playerInPurple) {
-		this.playerInPurple = playerInPurple;
-	}
-
-	public boolean isPlayerInGreen() {
-		return playerInGreen;
-	}
-
-	public void setPlayerinGreen(boolean playerInGreen) {
-		this.playerInGreen = playerInGreen;
-	}
+	private boolean pInP;
+	private boolean gInG;
+	
+	
+	
 
 	public MyContactListener(){
 
@@ -66,33 +54,43 @@ public class MyContactListener implements ContactListener{
 			
 		}
 		if(fb.getUserData() != null && fb.getUserData().equals("greenPlayer")){
-			if(fb.getUserData().equals("ball")){
+			if(fa.getUserData().equals("ball")){
 				setP2HoldingBall(true);
 			}
-		
 		}
-		if(fa.getUserData() != null && fa.getUserData().equals("playerSensor") 
-				&& fb.getUserData() != null && fb.getUserData().equals("playerSensor")){
-			playerColliding = true;
+		
+		//player collision
+		if((fa.getUserData() != null && fa.getUserData().equals("greenPlayerSensor") 
+				&& fb.getUserData() != null && fb.getUserData().equals("purplePlayerSensor"))
+				|| (fb.getUserData() != null && fb.getUserData().equals("greenPlayerSensor") 
+						&& fa.getUserData() != null && fa.getUserData().equals("purplePlayerSensor"))){
+			setPlayerColliding(true);
 		}
 
-		if(fa.getUserData() != null && fa.getUserData().equals("playerSensor")){
+		if(fa.getUserData() != null && fa.getUserData().equals("greenPlayerSensor")){
 			if(fb.getUserData() != null && fb.getUserData().equals("greenCorner")){
-				playerInGreen = true;
-			}
-			if(fb.getUserData() != null && fb.getUserData().equals("purpleCorner")){
-				playerInPurple = true;
+				setgInG(true);
 			}
 		}
 		
-		if(fb.getUserData() != null && fb.getUserData().equals("playerSensor")){
+		if(fb.getUserData() != null && fb.getUserData().equals("greenPlayerSensor")){
 			if(fa.getUserData() != null && fa.getUserData().equals("greenCorner")){
-				playerInGreen = true;
-			}
-			if(fa.getUserData() != null && fa.getUserData().equals("purpleCorner")){
-				playerInPurple = true;
+				setgInG(true);
 			}
 		}
+		
+		if(fa.getUserData() != null && fa.getUserData().equals("purplePlayerSensor")){
+			if(fb.getUserData() != null && fb.getUserData().equals("purpleCorner")){
+				setpInP(true);
+			}
+		}
+		
+		if(fb.getUserData() != null && fb.getUserData().equals("purplePlayerSensor")){
+			if(fa.getUserData() != null && fa.getUserData().equals("purpleCorner")){
+				setpInP(true);
+			}
+		}
+		
 	}
 
 
@@ -124,28 +122,36 @@ public class MyContactListener implements ContactListener{
 			}
 		}
 		
-		if(fa.getUserData() != null && fa.getUserData().equals("playerSensor") 
-				&& fb.getUserData() != null && fb.getUserData().equals("playerSensor")){
-			playerColliding = false;
-		}
-		
-		if(fa.getUserData() != null && fa.getUserData().equals("playerSensor")){
-			if(fb.getUserData() != null && fb.getUserData().equals("greenCorner")){
-				playerInGreen = false;
-			}
-			if(fb.getUserData() != null && fb.getUserData().equals("purpleCorner")){
-				playerInPurple = false;
-			}
-		}
-		
-		if(fb.getUserData() != null && fb.getUserData().equals("playerSensor")){
-			if(fa.getUserData() != null && fa.getUserData().equals("greenCorner")){
-				playerInGreen = false;
-			}
-			if(fa.getUserData() != null && fa.getUserData().equals("purpleCorner")){
-				playerInPurple = false;
-			}
-		}
+		//player collision
+				if((fa.getUserData() != null && fa.getUserData().equals("greenPlayerSensor") 
+						&& fb.getUserData() != null && fb.getUserData().equals("purplePlayerSensor"))
+						|(fb.getUserData() != null && fb.getUserData().equals("greenPlayerSensor") 
+								&& fa.getUserData() != null && fa.getUserData().equals("purplePlayerSensor"))){
+					playerColliding = false;
+				}
+
+				if(fa.getUserData() != null && fa.getUserData().equals("greenPlayerSensor")){
+					if(fb.getUserData() != null && fb.getUserData().equals("greenCorner")){
+						setgInG(false);
+					}
+				}
+				
+				if(fb.getUserData() != null && fb.getUserData().equals("greenPlayerSensor")){
+					if(fa.getUserData() != null && fa.getUserData().equals("greenCorner")){
+						setgInG(false);
+					}
+				}
+				if(fa.getUserData() != null && fa.getUserData().equals("purplePlayerSensor")){
+					if(fb.getUserData() != null && fb.getUserData().equals("purpleCorner")){
+						setpInP(false);
+					}
+				}
+				
+				if(fb.getUserData() != null && fb.getUserData().equals("purplePlayerSensor")){
+					if(fa.getUserData() != null && fa.getUserData().equals("purpleCorner")){
+						setpInP(false);
+					}
+				}
 	}
 
 	
@@ -184,6 +190,23 @@ public class MyContactListener implements ContactListener{
 
 	public void setPlayerColliding(boolean playerColliding) {
 		this.playerColliding = playerColliding;
+	}
+
+	public boolean ispInP() {
+		return pInP;
+	}
+
+	public void setpInP(boolean pInP) {
+		this.pInP = pInP;
+	}
+
+	public boolean isgInG() {
+		return gInG;
+	}
+
+	public void setgInG(boolean gInG) {
+		System.out.println("TRUE");
+		this.gInG = gInG;
 	}
 
 

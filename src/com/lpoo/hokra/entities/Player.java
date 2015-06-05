@@ -1,5 +1,7 @@
 package com.lpoo.hokra.entities;
 
+import javax.swing.plaf.ProgressBarUI;
+
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -7,7 +9,6 @@ import com.lpoo.hokra.handlers.B2DVars;
 import com.lpoo.hokra.main.Game;
 
 public class Player extends B2DSprite{
-
 	private boolean holdingBall;
 	Texture tex;
 	private int direction = B2DVars.RIGHT;

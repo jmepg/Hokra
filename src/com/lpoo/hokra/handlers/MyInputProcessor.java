@@ -1,5 +1,6 @@
 package com.lpoo.hokra.handlers;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Input.Keys;
 
@@ -72,4 +73,18 @@ public class MyInputProcessor extends InputAdapter{
 			}
 				return true;
 		}
+		
+		  public boolean TouchDown(int x, int y, int pointer, int button) {
+              if (button == Input.Buttons.LEFT) {
+                  onMouseDown();
+                  return true;
+              }
+              return false;
+          }
+
+		private void onMouseDown() {
+			
+		}
+
+      
 }

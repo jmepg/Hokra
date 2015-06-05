@@ -7,6 +7,8 @@ import static com.lpoo.hokra.main.Game.V_WIDTH;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -17,7 +19,8 @@ import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
+import com.lpoo.hokra.entities.BackBar;
+import com.lpoo.hokra.entities.Background;
 import com.lpoo.hokra.entities.Ball;
 import com.lpoo.hokra.entities.Player;
 import com.lpoo.hokra.entities.Square;
@@ -36,10 +39,13 @@ public class Play extends GameState {
 	//private Body playerBody;
 	private MyContactListener cl;
 	
+	private Background background;
 	private Player player1;
 	private Player player2;
 	private Square squareP1, squareP2, squareG1, squareG2;
 	private Ball ball;
+	private BackBar gBar;
+	private BackBar pBar;
 	
 	private boolean debug = true;
 	
@@ -54,12 +60,15 @@ public class Play extends GameState {
 		//dynamic body - always get affected by forces (PLAYER)
 		//kinematic body - dont get affected by forces 
 		
+		//Create background
+		background = createBackground();
+		
 		//create player
 		player1 = createPlayer(100,100,B2DVars.PURPLE,"purplePlayer");
 		player2 = createPlayer(150, 150, B2DVars.GREEN, "greenPlayer");
 		
 		//create ball
-		ball = createBall(200, 200);
+		ball = createBall(10, 10);
 		
 		//create walls
 		createWalls();
@@ -70,6 +79,11 @@ public class Play extends GameState {
 		squareG1 = createCorner(0, V_HEIGHT/PPM, B2DVars.GREEN, "greenCorner");
 		squareG2 = createCorner(V_WIDTH/PPM, 0, B2DVars.GREEN, "greenCorner");
 		
+		//Create Score Bar
+		pBar = createBar(140,240, B2DVars.GREEN);
+		gBar = createBar(370,240, B2DVars.GREEN);
+
+
 		
 		//set up b2dCam
 		b2dCam = new OrthographicCamera();
@@ -141,15 +155,19 @@ public class Play extends GameState {
 		updateBall();
 		updateballHolder();
 		updatePlayerScore();
+		updateBar(pBar, player1);
+		updateBar(gBar, player2);
 		ball.update(dt);
 		player1.update(dt);
 		player2.update(dt);
+		pBar.update(dt);
+		gBar.update(dt);
 	}
 
 
 	@Override
 	public void render() {	
-	/*	sb.setProjectionMatrix(cam.combined);
+		/*sb.setProjectionMatrix(cam.combined);
 		sb.begin();
 		font.draw(sb,"play state",100, 100);
 		sb.end();*/
@@ -159,14 +177,19 @@ public class Play extends GameState {
 		
 		//draw player
 		sb.setProjectionMatrix(cam.combined);
+		
+		background.render(sb);
 		squareP1.render(sb);
 		squareP2.render(sb);
 		squareG1.render(sb);
 		squareG2.render(sb);
+		
+		pBar.render(sb);
+		gBar.render(sb);
 		player1.render(sb);
 		player2.render(sb);
-		//ball.render(sb);
-
+		if(ball.getBody().isActive())
+			ball.render(sb);
 
 		
 		//draw screen
@@ -210,7 +233,7 @@ public class Play extends GameState {
 				player2.setHoldingBall(false);
 				cl.setP2HoldingBall(false);
 				player1.setHoldingBall(true);
-				cl.setP2HoldingBall(true);
+				cl.setP1HoldingBall(true);
 			}
 		}
 	}
@@ -219,11 +242,15 @@ public class Play extends GameState {
 		if(ball.getBody().isActive()) {
 			if(cl.isP1HoldingBall() || cl.isP2HoldingBall()){
 				ball.getBody().setUserData(null);
-				for(int i =0; i<ball.getSprites().length; i++){
+				ball.getBody().destroyFixture(ball.getBody().getFixtureList().get(0));
+				/*for(int i =0; i<ball.getSprites().length; i++){
 					ball.getSprites()[i].getTexture().dispose();
-				}
-				ball.getTex().dispose();
+				}*/
+				//ball.getTex().dispose();
+				
 				world.destroyBody(ball.getBody());
+
+				
 			}
 		}
 	}
@@ -251,12 +278,22 @@ public class Play extends GameState {
 		body.createFixture(fDef).setUserData(userData);
 		
 		//create sensor
-		shape.setAsBox(2/PPM, 2/PPM);
+		shape.setAsBox(3/PPM, 3/PPM);
 		fDef.shape = shape;
-		fDef.filter.categoryBits = B2DVars.BIT_PLAYER_SENSOR;
-		fDef.filter.maskBits = B2DVars.BIT_PLAYER_SENSOR | B2DVars.BIT_CORNER_PURPLE | B2DVars.BIT_CORNER_GREEN;
+		
+		if(color == B2DVars.GREEN){
+			System.out.println("Created GPlayer");
+			fDef.filter.categoryBits = B2DVars.BIT_GREEN_SENSOR;
+			fDef.filter.maskBits = B2DVars.BIT_PURPLE_SENSOR | B2DVars.BIT_CORNER_GREEN; 
+		}
+		
+		if(color == B2DVars.PURPLE){
+			fDef.filter.categoryBits = B2DVars.BIT_PURPLE_SENSOR;
+			fDef.filter.maskBits = B2DVars.BIT_GREEN_SENSOR | B2DVars.BIT_CORNER_PURPLE;
+		}
+		
 		fDef.isSensor = true;
-		body.createFixture(fDef).setUserData("playerSensor");
+		body.createFixture(fDef).setUserData(userData+"Sensor");
 
 		Player player = new Player(body, color);
 		shape.dispose();
@@ -284,11 +321,16 @@ public class Play extends GameState {
 		//create sensor
 		cShape.setAsBox(47/PPM, 47/PPM);
 		cornerDef.shape = cShape;
-		if(color == B2DVars.PURPLE)
+		
+		if(color == B2DVars.PURPLE){
 			cornerDef.filter.categoryBits = B2DVars.BIT_CORNER_PURPLE;
-		if(color == B2DVars.GREEN)
+			cornerDef.filter.maskBits = B2DVars.BIT_PURPLE_SENSOR;
+		}
+		if(color == B2DVars.GREEN){
+			System.out.println("Created GCorner");
 			cornerDef.filter.categoryBits = B2DVars.BIT_CORNER_GREEN;
-		cornerDef.filter.maskBits = B2DVars.BIT_PLAYER_SENSOR;
+			cornerDef.filter.maskBits = B2DVars.BIT_GREEN_SENSOR;
+		}
 		cornerDef.isSensor = true;
 		cornerB.createFixture(cornerDef).setUserData(userData);
 		Square sq = new Square(cornerB, color);
@@ -398,21 +440,96 @@ public class Play extends GameState {
 
 		}
 	}
-	
+
 	public void updatePlayerScore(){
-		if(cl.isPlayerInPurple()){
+		if(cl.ispInP()){
 			if(player1.isHoldingBall()){
 				player1.incScore();
-				System.out.println(player1.getScore());
+				System.out.println("Pl 1: " +player1.getScore());
 			}
 		}
-		if(cl.isPlayerInGreen()){
-			if(player2.isHoldingBall()){
-				player2.incScore();
-				System.out.println(player1.getScore());
+			if(cl.isgInG()){
+				System.out.println("CENAS");
+				if(player2.isHoldingBall()){
+					player2.incScore();
+					System.out.println("Pl 2:" + player2.getScore());
+				}
 			}
 		}
+	
+
+	public BackBar createBar(int x, int y, int color){
+
+		BodyDef bdef = new BodyDef();
+		Body body = world.createBody(bdef);
+		FixtureDef fdef = new FixtureDef();
+
+		bdef.position.set(x / PPM,y / PPM);
+		bdef.type = BodyType.StaticBody;
+		body = world.createBody(bdef);
+
+
+		PolygonShape shape = new PolygonShape();
+		shape.setAsBox(70/PPM, 10/PPM);
+		fdef.shape = shape;
+
+
+		body.createFixture(fdef).setUserData("backbar");
+
+		BackBar bar = new BackBar(body);
+		shape.dispose();
+		return bar;
+
+	}
+	
+	public void updateBar(BackBar bar, Player pl){
 		
+		Texture tex = bar.getTex();
+
+		int pScore = pl.getScore();
+		switch(pScore){
+		case 20:
+			tex = Game.res.getTexture("backBar1");
+			break;
+		case 200:
+			tex = Game.res.getTexture("backBar2");
+			break;
+		case 350:
+			tex = Game.res.getTexture("backBar3");
+			break;
+		default: 
+			break;	
+		
+		}
+		TextureRegion[] sprites = new TextureRegion[]{new TextureRegion(tex,140,20)};
+		
+		bar.setTex(tex);
+		bar.setSprites(sprites);
+		bar.setAnimation(sprites,1/12f);
+		
+	}
+	
+	public Background createBackground(){
+		BodyDef bdef = new BodyDef();
+		Body body = world.createBody(bdef);
+		FixtureDef fdef = new FixtureDef();
+
+		bdef.position.set(Game.V_WIDTH / PPM /2,Game.V_HEIGHT / PPM /2);
+		bdef.type = BodyType.StaticBody;
+		body = world.createBody(bdef);
+
+
+		PolygonShape shape = new PolygonShape();
+		shape.setAsBox(Game.V_WIDTH/PPM, Game.V_HEIGHT/PPM);
+		fdef.shape = shape;
+		
+
+		body.createFixture(fdef).setUserData("background");
+		
+		Background screenBackground = new Background(body);
+		shape.dispose();
+		
+		return screenBackground;
 	}
 
 }
